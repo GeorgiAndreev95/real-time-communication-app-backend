@@ -1,0 +1,15 @@
+services:
+    mysql:
+        image: mysql:latest
+        container_name: rtc-app-mysql-container
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: rootpassword
+            MYSQL_DATABASE: rtc-app
+        ports:
+            - "3307:3306"
+        volumes:
+            - mysql_data:/var/lib/mysql
+
+volumes:
+    mysql_data:
