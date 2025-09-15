@@ -3,11 +3,12 @@ import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
 
 import User from "../models/User.js";
+import deleteFile from "../../utils/file.js";
 
 export const signupUser = async (req, res, next) => {
-    const { email, username, password, confirmPassword, profilePicture } =
-        req.body;
+    const { email, username, password, confirmPassword } = req.body;
     const errors = validationResult(req);
+    const imageUrl = `/images/${req.file.filename}`;
 
     const existingUser = await User.findOne({ where: { email: email } });
     const existingUsername = await User.findOne({
@@ -35,7 +36,6 @@ export const signupUser = async (req, res, next) => {
                 username,
                 password,
                 confirmPassword,
-                profilePicture,
             },
         });
     }
@@ -47,7 +47,7 @@ export const signupUser = async (req, res, next) => {
             email,
             username,
             password: hashedPw,
-            profilePicture,
+            profilePicture: imageUrl,
         });
 
         res.status(201).json({
@@ -59,6 +59,11 @@ export const signupUser = async (req, res, next) => {
         });
     } catch (error) {
         console.log(error);
+
+        if (req.file) {
+            deleteFile(imageUrl);
+        }
+
         return res.status(500).json({ message: "Internal server error" });
     }
 };
