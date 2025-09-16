@@ -12,6 +12,8 @@ import User from "./src/models/User.js";
 import Server from "./src/models/Server.js";
 import Role from "./src/models/Role.js";
 import Membership from "./src/models/Membership.js";
+import Channel from "./src/models/Channel.js";
+import Message from "./src/models/Message.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -72,6 +74,18 @@ User.belongsToMany(Server, { through: Membership, foreignKey: "userId" });
 Server.belongsToMany(User, { through: Membership, foreignKey: "serverId" });
 Role.hasMany(Membership, { foreignKey: "roleId" });
 Membership.belongsTo(Role, { foreignKey: "roleId" });
+
+Server.hasMany(Channel, { foreignKey: "serverId" });
+Channel.belongsTo(Server, { foreignKey: "serverId" });
+
+User.hasMany(Channel, { foreignKey: "createdBy" });
+Channel.belongsTo(User, { as: "creator", foreignKey: "createdBy" });
+
+Channel.hasMany(Message, { foreignKey: "channelId" });
+Message.belongsTo(Channel, { foreignKey: "channelId" });
+
+User.hasMany(Message, { foreignKey: "senderId" });
+Message.belongsTo(User, { as: "sender", foreignKey: "senderId" });
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
