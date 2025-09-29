@@ -1,4 +1,6 @@
-import Server from "../models/Server";
+import Server from "../models/Server.js";
+import Membership from "../models/Membership.js";
+import Channel from "../models/Channel.js";
 
 export const getUserServers = async (req, res, next) => {
     try {
@@ -19,23 +21,32 @@ export const createServer = async (req, res, next) => {
     const userId = req.userId;
 
     try {
-        if (!req.file) {
-            return res.status(400).json({
-                message: "Attached file is not an image.",
-            });
-        }
-
-        const imageUrl = `/images/${req.file.filename}`;
+        const imageUrl = req.file ? `/images/${req.file.filename}` : null;
 
         const server = await Server.create({
             name,
             image: imageUrl,
+        });
+
+        console.log(userId);
+
+        const membership = await Membership.create({
             userId,
+            serverId: server.id,
+            roleId: 1,
+        });
+
+        const channel = await Channel.create({
+            name: "General",
+            serverId: server.id,
         });
 
         console.log(req.body);
+        console.log(membership);
         return res.status(201).json({
             server,
+            membership,
+            channel,
         });
     } catch (error) {
         if (req.file) {

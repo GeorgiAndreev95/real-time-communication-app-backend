@@ -8,7 +8,7 @@ import deleteFile from "../../utils/file.js";
 export const signupUser = async (req, res, next) => {
     const { email, username, password, confirmPassword } = req.body;
     const errors = validationResult(req);
-    const imageUrl = `/images/${req.file.filename}`;
+    const imageUrl = req.file ? `/images/${req.file.filename}` : null;
 
     const existingUser = await User.findOne({ where: { email: email } });
     const existingUsername = await User.findOne({

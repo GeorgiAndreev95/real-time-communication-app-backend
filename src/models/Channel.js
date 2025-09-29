@@ -10,10 +10,6 @@ const Channel = dbConnection.define("Channel", {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    createdBy: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
 });
 
 export default Channel;

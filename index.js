@@ -15,6 +15,9 @@ import Membership from "./src/models/Membership.js";
 import Channel from "./src/models/Channel.js";
 import Message from "./src/models/Message.js";
 
+import userRoutes from "./src/routes/userRoutes.js";
+import serverRoutes from "./src/routes/serverRoutes.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config();
@@ -64,27 +67,46 @@ app.use((req, res, next) => {
     next();
 });
 
-// app.use(enemyUnitRoutes);
-// app.use("/user", userRoutes);
-// app.use(factionRoutes);
+app.use("/user", userRoutes);
+app.use(serverRoutes);
 
-User.hasMany(Server, { as: "ownedServers", foreignKey: "ownerId" });
-Server.belongsTo(User, { as: "owner", foreignKey: "ownerId" });
+// User <-> Server (ownership and memberships)
+
 User.belongsToMany(Server, { through: Membership, foreignKey: "userId" });
 Server.belongsToMany(User, { through: Membership, foreignKey: "serverId" });
-Role.hasMany(Membership, { foreignKey: "roleId" });
-Membership.belongsTo(Role, { foreignKey: "roleId" });
 
-Server.hasMany(Channel, { foreignKey: "serverId" });
-Channel.belongsTo(Server, { foreignKey: "serverId" });
+Server.hasMany(Membership, {
+    as: "memberships",
+    foreignKey: "serverId",
+    onDelete: "CASCADE",
+});
+Membership.belongsTo(Server, { foreignKey: "serverId" });
 
-User.hasMany(Channel, { foreignKey: "createdBy" });
+User.hasMany(Membership, { as: "memberships", foreignKey: "userId" });
+Membership.belongsTo(User, { foreignKey: "userId" });
+
+// Role <-> Membership
+Role.hasMany(Membership, { as: "memberships", foreignKey: "roleId" });
+Membership.belongsTo(Role, { as: "role", foreignKey: "roleId" });
+
+// Server <-> Channel
+Server.hasMany(Channel, {
+    as: "channels",
+    foreignKey: "serverId",
+    onDelete: "CASCADE",
+});
+Channel.belongsTo(Server, { as: "server", foreignKey: "serverId" });
+
+// Channel <-> User (creator)
+User.hasMany(Channel, { as: "channels", foreignKey: "createdBy" });
 Channel.belongsTo(User, { as: "creator", foreignKey: "createdBy" });
 
-Channel.hasMany(Message, { foreignKey: "channelId" });
-Message.belongsTo(Channel, { foreignKey: "channelId" });
+// Channel <-> Message
+Channel.hasMany(Message, { as: "messages", foreignKey: "channelId" });
+Message.belongsTo(Channel, { as: "channel", foreignKey: "channelId" });
 
-User.hasMany(Message, { foreignKey: "senderId" });
+// User <-> Message (sender)
+User.hasMany(Message, { as: "messages", foreignKey: "senderId" });
 Message.belongsTo(User, { as: "sender", foreignKey: "senderId" });
 
 app.listen(PORT, () => {
