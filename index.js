@@ -17,6 +17,8 @@ import Message from "./src/models/Message.js";
 
 import userRoutes from "./src/routes/userRoutes.js";
 import serverRoutes from "./src/routes/serverRoutes.js";
+import channelRoutes from "./src/routes/channelRoutes.js";
+import messageRoutes from "./src/routes/messageRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -69,6 +71,8 @@ app.use((req, res, next) => {
 
 app.use("/user", userRoutes);
 app.use(serverRoutes);
+app.use("/server", channelRoutes);
+app.use(messageRoutes);
 
 // User <-> Server (ownership and memberships)
 
@@ -98,8 +102,8 @@ Server.hasMany(Channel, {
 Channel.belongsTo(Server, { as: "server", foreignKey: "serverId" });
 
 // Channel <-> User (creator)
-User.hasMany(Channel, { as: "channels", foreignKey: "createdBy" });
-Channel.belongsTo(User, { as: "creator", foreignKey: "createdBy" });
+// User.hasMany(Channel, { as: "channels", foreignKey: "createdBy" });
+// Channel.belongsTo(User, { as: "creator", foreignKey: "createdBy" });
 
 // Channel <-> Message
 Channel.hasMany(Message, { as: "messages", foreignKey: "channelId" });

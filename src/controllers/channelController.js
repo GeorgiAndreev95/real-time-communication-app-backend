@@ -1,5 +1,21 @@
-import Channel from "../models/Channel";
-import Server from "../models/Server";
+import Channel from "../models/Channel.js";
+import Server from "../models/Server.js";
+
+export const getServerChannels = async (req, res, next) => {
+    try {
+        const { serverId } = req.params;
+        const serverChannels = await Channel.findAll({
+            where: { serverId },
+        });
+
+        return res.status(200).json({
+            serverChannels,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
 
 export const createChannel = async (req, res, next) => {
     try {
@@ -19,7 +35,6 @@ export const createChannel = async (req, res, next) => {
         const channel = await Channel.create({
             name,
             serverId,
-            createdBy: req.userId,
         });
 
         return res

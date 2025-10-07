@@ -1,8 +1,8 @@
-import Membership from "../models/Membership";
-import Channel from "../models/Channel";
-import Message from "../models/Message";
-import Server from "../models/Server";
-import User from "../models/User";
+import Membership from "../models/Membership.js";
+import Channel from "../models/Channel.js";
+import Message from "../models/Message.js";
+import Server from "../models/Server.js";
+import User from "../models/User.js";
 
 export const createMessage = async (req, res, next) => {
     try {
@@ -17,21 +17,21 @@ export const createMessage = async (req, res, next) => {
         }
 
         const channel = await Channel.findOne({
-            include: [
-                {
-                    as: "server",
-                    model: Server,
-                    required: true,
-                    include: [
-                        {
-                            as: "membership",
-                            model: Membership,
-                            required: true,
-                            where: { userId },
-                        },
-                    ],
-                },
-            ],
+            // include: [
+            //     {
+            //         as: "server",
+            //         model: Server,
+            //         required: true,
+            //         include: [
+            //             {
+            //                 as: "membership",
+            //                 model: Membership,
+            //                 required: true,
+            //                 where: { userId },
+            //             },
+            //         ],
+            //     },
+            // ],
             where: { id: channelId },
         });
 
@@ -50,7 +50,7 @@ export const createMessage = async (req, res, next) => {
         const messageWithAuthor = await Message.findByPk(message.id, {
             include: [
                 {
-                    as: "user",
+                    as: "sender",
                     attributes: ["id", "username"],
                     model: User,
                 },
@@ -76,12 +76,12 @@ export const getMessage = async (req, res, next) => {
             attributes: ["id", "content", "createdAt", "updatedAt"],
             include: [
                 {
-                    as: "user",
+                    as: "sender",
                     attributes: ["id", "username"],
                     model: User,
                 },
             ],
-            order: [["createdAt", "DESC"]],
+            order: [["createdAt", "ASC"]],
             where: { channelId },
         });
 
@@ -96,11 +96,12 @@ export const deleteMessage = async (req, res, next) => {
     try {
         const { messageId } = req.params;
         const userId = req.userId;
+        console.log(userId);
 
         const message = await Message.findByPk(messageId, {
             include: [
                 {
-                    as: "user",
+                    as: "sender",
                     attributes: ["id", "username"],
                     model: User,
                 },
