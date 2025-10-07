@@ -92,6 +92,44 @@ export const getMessage = async (req, res, next) => {
     }
 };
 
+export const updateMessage = async (req, res, next) => {
+    try {
+        const { messageId } = req.params;
+        const { content } = req.body;
+        const userId = req.userId;
+
+        if (!messageId) {
+            return res.status(400).json({ error: "Message ID required" });
+        }
+
+        if (!content) {
+            return res.status(400).json({ error: "No fields to update" });
+        }
+
+        const message = await Message.findByPk(messageId);
+
+        if (!message) {
+            return res.status(400).json({ error: "No message found" });
+        }
+
+        if (message.senderId !== userId) {
+            return res
+                .status(400)
+                .json({ error: "You can only edit your own messages" });
+        }
+
+        const updateData = {};
+        if (content) updateData.content = content;
+
+        const updatedMessage = await message.update(updateData);
+
+        return res.status(200).json({ updatedMessage });
+    } catch (error) {
+        console.error("Error updating message:", error);
+        return res.status(500).json({ error: "Internal server error" });
+    }
+};
+
 export const deleteMessage = async (req, res, next) => {
     try {
         const { messageId } = req.params;
