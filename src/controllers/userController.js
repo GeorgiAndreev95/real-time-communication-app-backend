@@ -10,23 +10,6 @@ export const signupUser = async (req, res, next) => {
     const errors = validationResult(req);
     const imageUrl = req.file ? `/images/${req.file.filename}` : null;
 
-    const existingUser = await User.findOne({ where: { email: email } });
-    const existingUsername = await User.findOne({
-        where: { username: username },
-    });
-
-    if (existingUser) {
-        return res.status(400).json({
-            message: "A user with this email already exists.",
-        });
-    }
-
-    if (existingUsername) {
-        return res.status(400).json({
-            message: "This username is already taken.",
-        });
-    }
-
     if (!errors.isEmpty()) {
         return res.status(422).json({
             message: "Validation failed.",
