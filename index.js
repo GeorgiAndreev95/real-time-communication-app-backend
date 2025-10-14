@@ -84,7 +84,7 @@ Server.hasMany(Membership, {
     foreignKey: "serverId",
     onDelete: "CASCADE",
 });
-Membership.belongsTo(Server, { foreignKey: "serverId" });
+Membership.belongsTo(Server, { as: "server", foreignKey: "serverId" });
 
 User.hasMany(Membership, { as: "memberships", foreignKey: "userId" });
 Membership.belongsTo(User, { foreignKey: "userId" });

@@ -5,6 +5,13 @@ import Channel from "../models/Channel.js";
 export const getUserServers = async (req, res, next) => {
     try {
         const userServers = await Membership.findAll({
+            include: [
+                {
+                    as: "server",
+                    attributes: ["id", "image", "name"],
+                    model: Server,
+                },
+            ],
             where: { userId: req.userId },
         });
         return res.status(200).json({
