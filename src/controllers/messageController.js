@@ -51,7 +51,7 @@ export const createMessage = async (req, res, next) => {
             include: [
                 {
                     as: "sender",
-                    attributes: ["id", "username"],
+                    attributes: ["id", "username", "profilePicture"],
                     model: User,
                 },
             ],
@@ -77,7 +77,7 @@ export const getMessage = async (req, res, next) => {
             include: [
                 {
                     as: "sender",
-                    attributes: ["id", "username"],
+                    attributes: ["id", "username", "profilePicture"],
                     model: User,
                 },
             ],

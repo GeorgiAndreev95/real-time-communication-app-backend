@@ -14,7 +14,7 @@ const User = dbConnection.define("User", {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    profilePictur: {
+    profilePicture: {
         type: DataTypes.STRING,
         allowNull: false,
         defaultValue: "/images/default-avatar.svg",
