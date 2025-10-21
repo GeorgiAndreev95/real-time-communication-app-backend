@@ -10,6 +10,7 @@ export const getUserServers = async (req, res, next) => {
                     as: "server",
                     attributes: ["id", "image", "name"],
                     model: Server,
+                    include: ["preferences", "channels"],
                 },
             ],
             where: { userId: req.userId },

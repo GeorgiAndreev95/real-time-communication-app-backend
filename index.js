@@ -14,11 +14,13 @@ import Role from "./src/models/Role.js";
 import Membership from "./src/models/Membership.js";
 import Channel from "./src/models/Channel.js";
 import Message from "./src/models/Message.js";
+import UserServerPreference from "./src/models/UserServerPreference.js";
 
 import userRoutes from "./src/routes/userRoutes.js";
 import serverRoutes from "./src/routes/serverRoutes.js";
 import channelRoutes from "./src/routes/channelRoutes.js";
 import messageRoutes from "./src/routes/messageRoutes.js";
+import userPreferenceRoutes from "./src/routes/userPreferenceRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -72,6 +74,7 @@ app.use((req, res, next) => {
 app.use("/user", userRoutes);
 app.use(serverRoutes);
 app.use("/server", channelRoutes);
+app.use("/server", userPreferenceRoutes);
 app.use(messageRoutes);
 
 // User <-> Server (ownership and memberships)
@@ -112,6 +115,30 @@ Message.belongsTo(Channel, { as: "channel", foreignKey: "channelId" });
 // User <-> Message (sender)
 User.hasMany(Message, { as: "messages", foreignKey: "senderId" });
 Message.belongsTo(User, { as: "sender", foreignKey: "senderId" });
+
+// User <-> Server Preferences (last selected channel)
+User.hasMany(UserServerPreference, {
+    as: "preferences",
+    foreignKey: "userId",
+    onDelete: "CASCADE",
+});
+UserServerPreference.belongsTo(User, { foreignKey: "userId" });
+
+Server.hasMany(UserServerPreference, {
+    as: "preferences",
+    foreignKey: "serverId",
+    onDelete: "CASCADE",
+});
+UserServerPreference.belongsTo(Server, { foreignKey: "serverId" });
+
+Channel.hasMany(UserServerPreference, {
+    as: "preferences",
+    foreignKey: "lastChannelId",
+});
+UserServerPreference.belongsTo(Channel, {
+    as: "lastChannel",
+    foreignKey: "lastChannelId",
+});
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
