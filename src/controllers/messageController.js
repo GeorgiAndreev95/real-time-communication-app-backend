@@ -9,6 +9,7 @@ export const createMessage = async (req, res, next) => {
         const { channelId } = req.params;
         const { content } = req.body;
         const userId = req.userId;
+        const io = req.io;
 
         if (!content || typeof content !== "string") {
             return res
@@ -56,6 +57,10 @@ export const createMessage = async (req, res, next) => {
                 },
             ],
         });
+
+        const room = `channel:${channelId}`;
+        //Emit message to all members in that room
+        io.to(room).emit("newMessage", messageWithAuthor);
 
         return res.status(201).json({ message: messageWithAuthor });
     } catch (error) {

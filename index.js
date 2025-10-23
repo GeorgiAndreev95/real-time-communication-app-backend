@@ -3,7 +3,9 @@ import bodyParser from "body-parser";
 import multer from "multer";
 import path from "path";
 import dotenv from "dotenv";
+import { createServer } from "http";
 import { fileURLToPath } from "url";
+import { Server as SocketIOServer } from "socket.io";
 
 import seedRoles from "./utils/seedRoles.js";
 import dbConnection from "./utils/database.js";
@@ -49,6 +51,37 @@ const fileFilter = (req, file, cb) => {
         cb(null, false);
     }
 };
+
+const httpServer = createServer(app);
+const io = new SocketIOServer(httpServer, {
+    cors: {
+        origin: "http://localhost:5173",
+        methods: ["GET", "POST"],
+    },
+});
+
+io.on("connection", (socket) => {
+    console.log("Client connected:", socket.id);
+
+    socket.on("joinChannel", (channelId) => {
+        socket.join(`channel:${channelId}`);
+        console.log(`User ${socket.id} joined channel room: ${channelId}`);
+    });
+
+    socket.on("leaveChannel", (channelId) => {
+        socket.leave(`channel:${channelId}`);
+        console.log(`User ${socket.id} left channel room: ${channelId}`);
+    });
+
+    socket.on("disconnect", () => {
+        console.log("Client disconnected:", socket.id);
+    });
+});
+
+app.use((req, res, next) => {
+    req.io = io;
+    next();
+});
 
 app.use(bodyParser.json());
 app.use(multer({ storage: fileStorage, fileFilter }).single("image")); //image is the name property of the input field submitting the file
@@ -140,7 +173,7 @@ UserServerPreference.belongsTo(Channel, {
     foreignKey: "lastChannelId",
 });
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
