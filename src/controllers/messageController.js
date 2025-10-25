@@ -102,6 +102,7 @@ export const updateMessage = async (req, res, next) => {
         const { messageId } = req.params;
         const { content } = req.body;
         const userId = req.userId;
+        const io = req.io;
 
         if (!messageId) {
             return res.status(400).json({ error: "Message ID required" });
@@ -111,7 +112,15 @@ export const updateMessage = async (req, res, next) => {
             return res.status(400).json({ error: "No fields to update" });
         }
 
-        const message = await Message.findByPk(messageId);
+        const message = await Message.findByPk(messageId, {
+            include: [
+                {
+                    as: "sender",
+                    attributes: ["id", "username", "profilePicture"],
+                    model: User,
+                },
+            ],
+        });
 
         if (!message) {
             return res.status(400).json({ error: "No message found" });
@@ -128,6 +137,9 @@ export const updateMessage = async (req, res, next) => {
 
         const updatedMessage = await message.update(updateData);
 
+        const room = `channel:${message.channelId}`;
+        io.to(room).emit("messageEdited", updatedMessage);
+
         return res.status(200).json({ updatedMessage });
     } catch (error) {
         console.error("Error updating message:", error);
@@ -139,7 +151,7 @@ export const deleteMessage = async (req, res, next) => {
     try {
         const { messageId } = req.params;
         const userId = req.userId;
-        console.log(userId);
+        const io = req.io;
 
         const message = await Message.findByPk(messageId, {
             include: [
@@ -179,7 +191,11 @@ export const deleteMessage = async (req, res, next) => {
                 .json({ message: "Not authorized to delete this message" });
         }
 
+        const channelId = message.channelId;
         await message.destroy();
+
+        const room = `channel:${channelId}`;
+        io.to(room).emit("messageDeleted", { messageId: +messageId });
 
         return res
             .status(200)
