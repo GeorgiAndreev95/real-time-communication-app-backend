@@ -1,6 +1,7 @@
 import Server from "../models/Server.js";
 import Membership from "../models/Membership.js";
 import Channel from "../models/Channel.js";
+import UserServerPreference from "../models/UserServerPreference.js";
 
 export const getUserServers = async (req, res, next) => {
     try {
@@ -10,7 +11,22 @@ export const getUserServers = async (req, res, next) => {
                     as: "server",
                     attributes: ["id", "image", "name"],
                     model: Server,
-                    include: ["preferences", "channels"],
+                    include: [
+                        {
+                            as: "preferences",
+                            model: UserServerPreference,
+                            where: { userId: req.userId },
+                            required: false,
+                            attributes: ["lastChannelId"],
+                            include: [
+                                {
+                                    as: "lastChannel",
+                                    model: Channel,
+                                    attributes: ["id", "name"],
+                                },
+                            ],
+                        },
+                    ],
                 },
             ],
             where: { userId: req.userId },
