@@ -123,7 +123,7 @@ Server.hasMany(Membership, {
 Membership.belongsTo(Server, { as: "server", foreignKey: "serverId" });
 
 User.hasMany(Membership, { as: "memberships", foreignKey: "userId" });
-Membership.belongsTo(User, { foreignKey: "userId" });
+Membership.belongsTo(User, { as: "user", foreignKey: "userId" });
 
 // Role <-> Membership
 Role.hasMany(Membership, { as: "memberships", foreignKey: "roleId" });

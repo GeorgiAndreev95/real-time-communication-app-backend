@@ -1,6 +1,7 @@
+import User from "../models/User.js";
 import Server from "../models/Server.js";
-import Membership from "../models/Membership.js";
 import Channel from "../models/Channel.js";
+import Membership from "../models/Membership.js";
 import UserServerPreference from "../models/UserServerPreference.js";
 
 export const getUserServers = async (req, res, next) => {
@@ -29,6 +30,22 @@ export const getUserServers = async (req, res, next) => {
                                     attributes: ["id", "name"],
                                 },
                             ],
+                        },
+                        {
+                            as: "memberships",
+                            attributes: ["roleId"],
+                            include: [
+                                {
+                                    as: "user",
+                                    attributes: [
+                                        "id",
+                                        "username",
+                                        "profilePicture",
+                                    ],
+                                    model: User,
+                                },
+                            ],
+                            model: Membership,
                         },
                     ],
                 },
